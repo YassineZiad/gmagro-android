@@ -15,6 +15,7 @@ import com.yziad.ap2_gmagro_android.daos.DatasDAO;
 import com.yziad.ap2_gmagro_android.daos.DelegateAsyncTask;
 import com.yziad.ap2_gmagro_android.daos.IntervenantDAO;
 import com.yziad.ap2_gmagro_android.models.Activite;
+import com.yziad.ap2_gmagro_android.models.Machine;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,6 +28,7 @@ public class NewInterventionActivity extends AppCompatActivity {
     String time = "";
 
     private ArrayAdapter<Activite> adapterActivite;
+    private ArrayAdapter<Machine> adapterMachine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,10 @@ public class NewInterventionActivity extends AppCompatActivity {
         Spinner niActivites = findViewById(R.id.niActivites);
         adapterActivite = new ArrayAdapter<Activite>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesActivites());
         niActivites.setAdapter(adapterActivite);
+
+        Spinner niMachines = findViewById(R.id.niMachines);
+        adapterMachine = new ArrayAdapter<Machine>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesMachines());
+        niMachines.setAdapter(adapterMachine);
 
 
         TextView niDateDebut = findViewById(R.id.niDateDebut);
@@ -82,7 +88,14 @@ public class NewInterventionActivity extends AppCompatActivity {
                 }
             }
         });
-        DatasDAO
+        DatasDAO.getInstance().loadAllMachines(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if (b) {
+                    adapterMachine.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
 }
