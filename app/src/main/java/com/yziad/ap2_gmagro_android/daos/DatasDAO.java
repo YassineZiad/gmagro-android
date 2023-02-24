@@ -1,10 +1,12 @@
 package com.yziad.ap2_gmagro_android.daos;
 
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yziad.ap2_gmagro_android.models.Activite;
+import com.yziad.ap2_gmagro_android.models.CSOD;
 import com.yziad.ap2_gmagro_android.models.Intervention;
 import com.yziad.ap2_gmagro_android.models.Machine;
 import com.yziad.ap2_gmagro_android.wsHTTPS;
@@ -26,10 +28,17 @@ public class DatasDAO {
     private List<Activite> lesActivites;
     private List<Machine> lesMachines;
 
+    private List<CSOD> lesCausesDefaut, lesCausesObjet, lesSymptomesDefaut, lesSymptomesObjet;
+
     private DatasDAO() {
         lesInterventions = new ArrayList<>();
         lesActivites = new ArrayList<>();
         lesMachines = new ArrayList<>();
+
+        lesCausesDefaut = new ArrayList<>();
+        lesCausesObjet = new ArrayList<>();
+        lesSymptomesDefaut = new ArrayList<>();
+        lesSymptomesObjet = new ArrayList<>();
     }
 
     public static DatasDAO getInstance() {
@@ -40,10 +49,13 @@ public class DatasDAO {
     }
 
     public List<Intervention> getLesInterventions() { return lesInterventions; }
-    public List<Activite> getLesActivites() {
-        return lesActivites;
-    }
+    public List<Activite> getLesActivites() { return lesActivites; }
+    public List<Machine> getLesMachines() { return lesMachines; }
 
+    public List<CSOD> getLesCausesDefaut() { return lesCausesDefaut; }
+    public List<CSOD> getLesCausesObjet() { return lesCausesObjet; }
+    public List<CSOD> getLesSymptomesDefaut() { return lesSymptomesDefaut; }
+    public List<CSOD> getLesSymptomesObjet() { return lesSymptomesObjet; }
 
     //INTERVENTIONS
     public void loadAllInterventions(DelegateAsyncTask delegate) {
@@ -155,4 +167,95 @@ public class DatasDAO {
         delegate.traiterFinWS(jRetour, b);
     }
 
+    //CAUSES ET SYMPTOMES (CSOD)
+    public void loadAllCausesDefaut(DelegateAsyncTask delegate) {
+        String url = controller + "action=causes_defaut";
+        wsHTTPS ws = new wsHTTPS() {
+            @Override
+            protected void onPostExecute(String jsonMsg) {
+                traiterPostLoadCSOD(jsonMsg, delegate, "causes_defaut");
+            }
+        };
+        ws.execute(url);
+    }
+
+    public void loadAllCausesObjet(DelegateAsyncTask delegate) {
+        String url = controller + "action=causes_objet";
+        wsHTTPS ws = new wsHTTPS() {
+            @Override
+            protected void onPostExecute(String jsonMsg) {
+                traiterPostLoadCSOD(jsonMsg, delegate, "causes_objet");
+            }
+        };
+        ws.execute(url);
+    }
+
+    public void loadAllSymptomesDefaut(DelegateAsyncTask delegate) {
+        String url = controller + "action=symptomes_defaut";
+        wsHTTPS ws = new wsHTTPS() {
+            @Override
+            protected void onPostExecute(String jsonMsg) {
+                traiterPostLoadCSOD(jsonMsg, delegate, "symptomes_defaut");
+            }
+        };
+        ws.execute(url);
+    }
+
+    public void loadAllSymptomesObjet(DelegateAsyncTask delegate) {
+        String url = controller + "action=symptomes_objet";
+        wsHTTPS ws = new wsHTTPS() {
+            @Override
+            protected void onPostExecute(String jsonMsg) {
+                traiterPostLoadCSOD(jsonMsg, delegate, "symptomes_objet");
+            }
+        };
+        ws.execute(url);
+    }
+
+    private void traiterPostLoadCSOD(String jRetour, DelegateAsyncTask delegate, String typeCSOD) {
+        Boolean b = null;
+        try {
+            JSONObject jsonMsg = new JSONObject(jRetour);
+            b = jsonMsg.getBoolean("success");
+
+            if (b) {
+                lesMachines.clear();
+                String jsonLesCSOD = jsonMsg.getString("retour");
+                try {
+                    Arrays.asList(om.readValue(jsonLesCSOD, CSOD[].class)).forEach(csod -> {
+                        csod.setType(typeCSOD);
+                        switch (typeCSOD) {
+                            case "causes_defaut":
+                                lesCausesDefaut.add(csod);
+                                break;
+
+                            case "causes_objet":
+                                lesCausesObjet.add(csod);
+                                break;
+
+                            case "symptomes_defaut":
+                                lesSymptomesDefaut.add(csod);
+                                break;
+
+                            case "symptomes_objet":
+                                lesSymptomesObjet.add(csod);
+                                break;
+
+                            default:
+                                break;
+                        }
+                    });
+                    b = true;
+
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e("MAUVAIS RETOUR", jsonMsg.getString("retour"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        delegate.traiterFinWS(jRetour, b);
+    }
 }

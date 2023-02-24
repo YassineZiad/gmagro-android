@@ -4,6 +4,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -17,7 +19,6 @@ import com.yziad.ap2_gmagro_android.R;
 import com.yziad.ap2_gmagro_android.daos.DatasDAO;
 import com.yziad.ap2_gmagro_android.daos.DelegateAsyncTask;
 import com.yziad.ap2_gmagro_android.daos.IntervenantDAO;
-import com.yziad.ap2_gmagro_android.models.Activite;
 import com.yziad.ap2_gmagro_android.models.Intervention;
 
 public class InterventionsActivity extends AppCompatActivity {
@@ -31,28 +32,14 @@ public class InterventionsActivity extends AppCompatActivity {
 
         loadInterventions();
 
-        View.OnClickListener deconnexion = new View.OnClickListener() {
-            public void onClick(View view) {
-                IntervenantDAO.getInstance().disconnectUser(new DelegateAsyncTask() {
-                    @Override
-                    public void traiterFinWS(Object result, Boolean b) {
-                        if (b) {
-                            disconnectToast("Déconnexion réussie");
-                            finish();
-                        } else {
-                            disconnectToast((String) result);
-                        }
-                    }
-                });
-            }
-        };
-
         ListView iInterventions = findViewById(R.id.iInterventions);
         adapterIntervention = new ArrayAdapter<Intervention>(this, android.R.layout.simple_list_item_1, DatasDAO.getInstance().getLesInterventions());
         iInterventions.setAdapter(adapterIntervention);
 
-        Button iaDisconnect = findViewById(R.id.naDisconnect);
-        iaDisconnect.setOnClickListener(deconnexion);
+        Button iDisconnect = findViewById(R.id.iDisconnect);
+        iDisconnect.setOnClickListener(v -> {
+            cliqueRetour(findViewById(R.id.niDisconnect));
+        });
 
         ActivityResultLauncher<Intent> launcherInterventionsActivity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), activityResult -> {
             switch (activityResult.getResultCode()) {
@@ -60,13 +47,13 @@ public class InterventionsActivity extends AppCompatActivity {
                     loadInterventions();
                     break;
                 case 2:
-                    iaDisconnect.performClick();
+                    iDisconnect.performClick();
                     break;
             }
             //activityResult.getResultCode() == 1)
         });
 
-        TextView iaTextView = findViewById(R.id.iaTextView);
+        TextView iaTextView = findViewById(R.id.iTextView);
         iaTextView.setText("Intervenant : " + IntervenantDAO.getInstance().getConnectedUser());
 
         Button iaCreerIntervention = findViewById(R.id.iaCreerIntervention);
@@ -89,5 +76,43 @@ public class InterventionsActivity extends AppCompatActivity {
 
     private void disconnectToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        cliqueRetour(findViewById(R.id.iDisconnect));
+    }
+
+    private void cliqueRetour(View view) {
+        AlertDialog.Builder dialRetour = new AlertDialog.Builder(view.getContext());
+        dialRetour.setTitle("Déconnexion");
+        dialRetour.setMessage("Se déconnecter ?");
+        dialRetour.setCancelable(false);
+
+        dialRetour.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                IntervenantDAO.getInstance().disconnectUser(new DelegateAsyncTask() {
+                    @Override
+                    public void traiterFinWS(Object result, Boolean b) {
+                        if (b) {
+                            disconnectToast("Déconnexion réussie");
+                            finish();
+                        } else {
+                            disconnectToast((String) result);
+                        }
+                    }
+                });
+            }
+        });
+
+        dialRetour.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        dialRetour.show();
     }
 }

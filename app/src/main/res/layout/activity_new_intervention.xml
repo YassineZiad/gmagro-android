@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -32,7 +31,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/naTextView"
+                    android:id="@+id/niTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
@@ -40,7 +39,7 @@
                     android:text="Intervenant :" />
 
                 <Button
-                    android:id="@+id/naDisconnect"
+                    android:id="@+id/niDisconnect"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
@@ -49,9 +48,10 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/LayoutAB"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -59,7 +59,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/niDisconnectLayout">
 
                 <LinearLayout
-                    android:id="@+id/linearLayout4"
+                    android:id="@+id/LayoutA"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center"
@@ -69,6 +69,7 @@
                         android:id="@+id/niActivites"
                         android:layout_width="175dp"
                         android:layout_height="50dp"
+                        android:spinnerMode="dialog"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                     <LinearLayout
@@ -85,7 +86,8 @@
                             android:ems="10"
                             android:enabled="false"
                             android:hint="Date de début"
-                            android:inputType="textPersonName" />
+                            android:inputType="datetime"
+                            android:textSize="15sp" />
 
                         <ImageButton
                             android:id="@+id/niDateDebutBtn"
@@ -100,17 +102,20 @@
                         android:id="@+id/niCausesDefaut"
                         android:layout_width="175dp"
                         android:layout_height="50dp"
+                        android:spinnerMode="dialog"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                     <Spinner
                         android:id="@+id/niCausesObjet"
                         android:layout_width="175dp"
                         android:layout_height="50dp"
+                        android:spinnerMode="dialog"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/LayoutB"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center"
@@ -120,23 +125,159 @@
                         android:id="@+id/niMachines"
                         android:layout_width="175dp"
                         android:layout_height="50dp"
+                        android:spinnerMode="dialog"
+                        android:textSize="10dp"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                     <Spinner
                         android:id="@+id/niSymptomesDefaut"
                         android:layout_width="175dp"
                         android:layout_height="50dp"
+                        android:spinnerMode="dialog"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                     <Spinner
                         android:id="@+id/niSymptomesObjet"
                         android:layout_width="175dp"
                         android:layout_height="50dp"
+                        android:spinnerMode="dialog"
                         tools:ignore="SpeakableTextPresentCheck" />
 
                 </LinearLayout>
 
             </LinearLayout>
+
+            <EditText
+                android:id="@+id/niCommentaire"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:ems="10"
+                android:hint="Commentaires"
+                android:inputType="textPersonName"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/LayoutAB" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/LayoutC"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/niCommentaire">
+
+                <CheckBox
+                    android:id="@+id/niTermine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="3dp"
+                    android:text="Intervention Terminée"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+                <LinearLayout
+                    android:id="@+id/niDateFinLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <EditText
+                        android:id="@+id/niDateFin"
+                        android:layout_width="100dp"
+                        android:layout_height="match_parent"
+                        android:editable="false"
+                        android:ems="10"
+                        android:enabled="false"
+                        android:hint="Date de fin"
+                        android:inputType="datetime"
+                        android:textAlignment="center"
+                        android:textSize="10sp"
+                        tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+                    <ImageButton
+                        android:id="@+id/niDateFinBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        app:srcCompat="@android:drawable/ic_menu_more"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck,TouchTargetSizeCheck" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/niMachineArretee"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="3dp"
+                    android:text="Machine Arrêtée"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/niTermine"
+                    tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+                <LinearLayout
+                    android:id="@+id/niTempsArretLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/niDateFinLayout">
+
+                    <EditText
+                        android:id="@+id/niTempsArret"
+                        android:layout_width="100dp"
+                        android:layout_height="match_parent"
+                        android:editable="false"
+                        android:ems="10"
+                        android:enabled="false"
+                        android:hint="Temps d'arrêt"
+                        android:inputType="time"
+                        android:textAlignment="center"
+                        android:textSize="10sp"
+                        tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+                    <ImageButton
+                        android:id="@+id/niTempsArretBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        app:srcCompat="@android:drawable/ic_menu_more"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck,TouchTargetSizeCheck" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/niChangeOrgane"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="3dp"
+                    android:text="Changement d'organe"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/niMachineArretee"
+                    tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/niPertes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginEnd="10dp"
+                    android:text="Pertes"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/niTempsArretLayout"
+                    tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

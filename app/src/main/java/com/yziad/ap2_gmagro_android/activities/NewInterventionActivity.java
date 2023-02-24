@@ -2,11 +2,16 @@ package com.yziad.ap2_gmagro_android.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -15,11 +20,11 @@ import com.yziad.ap2_gmagro_android.daos.DatasDAO;
 import com.yziad.ap2_gmagro_android.daos.DelegateAsyncTask;
 import com.yziad.ap2_gmagro_android.daos.IntervenantDAO;
 import com.yziad.ap2_gmagro_android.models.Activite;
+import com.yziad.ap2_gmagro_android.models.CSOD;
 import com.yziad.ap2_gmagro_android.models.Machine;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NewInterventionActivity extends AppCompatActivity {
 
@@ -29,6 +34,10 @@ public class NewInterventionActivity extends AppCompatActivity {
 
     private ArrayAdapter<Activite> adapterActivite;
     private ArrayAdapter<Machine> adapterMachine;
+    private ArrayAdapter<CSOD> adapterCausesDefaut;
+    private ArrayAdapter<CSOD> adapterCausesObjet;
+    private ArrayAdapter<CSOD> adapterSymptomesDefaut;
+    private ArrayAdapter<CSOD> adapterSymptomesObjet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +46,12 @@ public class NewInterventionActivity extends AppCompatActivity {
 
         loadDatas();
 
-        TextView naTextView = findViewById(R.id.naTextView);
+        TextView naTextView = findViewById(R.id.niTextView);
         naTextView.setText("Intervenant : " + IntervenantDAO.getInstance().getConnectedUser());
 
-        Button naDisconnect = findViewById(R.id.naDisconnect);
-        naDisconnect.setOnClickListener(v -> {
-            setResult(2);
-            finish();
+        Button niDisconnect = findViewById(R.id.niDisconnect);
+        niDisconnect.setOnClickListener(v -> {
+            cliqueRetour(findViewById(R.id.niDisconnect));
         });
 
         Spinner niActivites = findViewById(R.id.niActivites);
@@ -54,6 +62,21 @@ public class NewInterventionActivity extends AppCompatActivity {
         adapterMachine = new ArrayAdapter<Machine>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesMachines());
         niMachines.setAdapter(adapterMachine);
 
+        Spinner niCausesDefaut = findViewById(R.id.niCausesDefaut);
+        adapterCausesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesDefaut());
+        niCausesDefaut.setAdapter(adapterCausesDefaut);
+
+        Spinner niCausesObjet = findViewById(R.id.niCausesObjet);
+        adapterCausesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesObjet());
+        niCausesObjet.setAdapter(adapterCausesObjet);
+
+        Spinner niSymptomesDefaut = findViewById(R.id.niSymptomesDefaut);
+        adapterSymptomesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesDefaut());
+        niSymptomesDefaut.setAdapter(adapterSymptomesDefaut);
+
+        Spinner niSymptomesObjet = findViewById(R.id.niSymptomesObjet);
+        adapterSymptomesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesObjet());
+        niSymptomesObjet.setAdapter(adapterSymptomesObjet);
 
         TextView niDateDebut = findViewById(R.id.niDateDebut);
         findViewById(R.id.niDateDebutBtn).setOnClickListener(v -> {
@@ -66,16 +89,37 @@ public class NewInterventionActivity extends AppCompatActivity {
 
             TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
                 time = hh + ":" + mm + ":00";
-                niDateDebut.setText(niDateDebut.getText().toString() + " " + time);
+                niDateDebut.setText(niDateDebut.getText().toString() + " " + hh + ":" + mm);
             }, hourOfDay, minute, true);
             timePickerDialog.show();
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
                 date = yyyy + "-" + (MM + 1) + "-" + dd;
-                niDateDebut.setText(dd + "/" + MM + "/" + yyyy);
+                niDateDebut.setText(dd + "/" + (MM + 1) + "/" + yyyy);
             }, year, month, day);
             datePickerDialog.show();
 
+        });
+
+        CheckBox niTermine = findViewById(R.id.niTermine);
+        niTermine.setOnClickListener(v -> {
+            LinearLayout niDateFinLayout = findViewById(R.id.niDateFinLayout);
+            if (niDateFinLayout.getVisibility() == View.INVISIBLE) {
+                niDateFinLayout.setVisibility(View.VISIBLE);
+            } else {
+                niDateFinLayout.setVisibility(View.INVISIBLE);
+            }
+
+        });
+
+        CheckBox niTempsArret = findViewById(R.id.niMachineArretee);
+        niTempsArret.setOnClickListener(v -> {
+            LinearLayout niTempsArretLayout = findViewById(R.id.niTempsArretLayout);
+            if (niTempsArretLayout.getVisibility() == View.INVISIBLE) {
+                niTempsArretLayout.setVisibility(View.VISIBLE);
+            } else {
+                niTempsArretLayout.setVisibility(View.INVISIBLE);
+            }
         });
     }
 
@@ -96,6 +140,67 @@ public class NewInterventionActivity extends AppCompatActivity {
                 }
             }
         });
+        DatasDAO.getInstance().loadAllCausesDefaut(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if(b) {
+                    adapterCausesDefaut.notifyDataSetChanged();
+                }
+            }
+        });
+        DatasDAO.getInstance().loadAllCausesObjet(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if (b) {
+                    adapterCausesObjet.notifyDataSetChanged();
+                }
+            }
+        });
+        DatasDAO.getInstance().loadAllSymptomesDefaut(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if (b) {
+                    adapterSymptomesDefaut.notifyDataSetChanged();
+                }
+            }
+        });
+        DatasDAO.getInstance().loadAllSymptomesObjet(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if (b) {
+                    adapterSymptomesObjet.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        cliqueRetour(findViewById(R.id.niDisconnect));
+    }
+
+    private void cliqueRetour(View view) {
+        AlertDialog.Builder dialRetour = new AlertDialog.Builder(view.getContext());
+        dialRetour.setTitle("Déconnexion");
+        dialRetour.setMessage("Annuler la nouvelle intervention et se déconnecter ?");
+        dialRetour.setCancelable(false);
+
+        dialRetour.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                setResult(2);
+                finish();
+            }
+        });
+
+        dialRetour.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        dialRetour.show();
     }
 
 }
