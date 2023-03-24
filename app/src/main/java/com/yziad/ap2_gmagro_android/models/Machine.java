@@ -38,7 +38,7 @@ public class Machine {
 
     @Override
     public String toString() {
-        return code + " - " + numero_serie;
+        return code ;
     }
 
 }

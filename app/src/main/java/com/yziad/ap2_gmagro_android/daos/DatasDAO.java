@@ -48,14 +48,33 @@ public class DatasDAO {
         return instance;
     }
 
-    public List<Intervention> getLesInterventions() { return lesInterventions; }
-    public List<Activite> getLesActivites() { return lesActivites; }
-    public List<Machine> getLesMachines() { return lesMachines; }
+    public List<Intervention> getLesInterventions() {
+        return lesInterventions;
+    }
 
-    public List<CSOD> getLesCausesDefaut() { return lesCausesDefaut; }
-    public List<CSOD> getLesCausesObjet() { return lesCausesObjet; }
-    public List<CSOD> getLesSymptomesDefaut() { return lesSymptomesDefaut; }
-    public List<CSOD> getLesSymptomesObjet() { return lesSymptomesObjet; }
+    public List<Activite> getLesActivites() {
+        return lesActivites;
+    }
+
+    public List<Machine> getLesMachines() {
+        return lesMachines;
+    }
+
+    public List<CSOD> getLesCausesDefaut() {
+        return lesCausesDefaut;
+    }
+
+    public List<CSOD> getLesCausesObjet() {
+        return lesCausesObjet;
+    }
+
+    public List<CSOD> getLesSymptomesDefaut() {
+        return lesSymptomesDefaut;
+    }
+
+    public List<CSOD> getLesSymptomesObjet() {
+        return lesSymptomesObjet;
+    }
 
     //INTERVENTIONS
     public void loadAllInterventions(DelegateAsyncTask delegate) {
@@ -117,9 +136,11 @@ public class DatasDAO {
                 String jsonLesActivites = jsonMsg.getString("retour");
                 try {
                     Arrays.asList(om.readValue(jsonLesActivites, Activite[].class)).forEach(activite -> lesActivites.add(activite));
-                    b = true;
+
                 } catch (JsonProcessingException e) {
+                    b = false;
                     e.printStackTrace();
+
                 }
             } else {
                 Log.e("MAUVAIS RETOUR", jsonMsg.getString("retour"));
@@ -154,8 +175,9 @@ public class DatasDAO {
                 String jsonLesMachines = jsonMsg.getString("retour");
                 try {
                     Arrays.asList(om.readValue(jsonLesMachines, Machine[].class)).forEach(machine -> lesMachines.add(machine));
-                    b = true;
+
                 } catch (JsonProcessingException e) {
+                    b = false;
                     e.printStackTrace();
                 }
             } else {
@@ -219,7 +241,6 @@ public class DatasDAO {
             b = jsonMsg.getBoolean("success");
 
             if (b) {
-                lesMachines.clear();
                 String jsonLesCSOD = jsonMsg.getString("retour");
                 try {
                     Arrays.asList(om.readValue(jsonLesCSOD, CSOD[].class)).forEach(csod -> {

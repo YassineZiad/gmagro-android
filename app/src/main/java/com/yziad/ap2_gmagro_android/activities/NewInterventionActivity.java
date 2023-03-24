@@ -112,8 +112,23 @@ public class NewInterventionActivity extends AppCompatActivity {
 
         });
 
-        CheckBox niTempsArret = findViewById(R.id.niMachineArretee);
-        niTempsArret.setOnClickListener(v -> {
+        TextView niDateFin = findViewById(R.id.niDateFin);
+        findViewById(R.id.niDateFinBtn).setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
+                String dateFin = yyyy + "-" + (MM + 1) + "-" + dd;
+                niDateFin.setText(dd + "/" + (MM + 1) + "/" + yyyy);
+            }, year, month, day);
+            datePickerDialog.show();
+
+        });
+
+        CheckBox niMachineArretee = findViewById(R.id.niMachineArretee);
+        niMachineArretee.setOnClickListener(v -> {
             LinearLayout niTempsArretLayout = findViewById(R.id.niTempsArretLayout);
             if (niTempsArretLayout.getVisibility() == View.INVISIBLE) {
                 niTempsArretLayout.setVisibility(View.VISIBLE);
@@ -121,6 +136,21 @@ public class NewInterventionActivity extends AppCompatActivity {
                 niTempsArretLayout.setVisibility(View.INVISIBLE);
             }
         });
+
+        TextView niTempsArret = findViewById(R.id.niTempsArret);
+        findViewById(R.id.niTempsArretBtn).setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
+            int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
+            int minute = c.get(Calendar.MINUTE);
+
+            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
+                String timeArret = hh + ":" + mm + ":00";
+                niTempsArret.setText(hh + ":" + mm);
+            }, hourOfDay, minute, true);
+            timePickerDialog.show();
+
+        });
+
     }
 
     private void loadDatas() {
