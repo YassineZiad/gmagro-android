@@ -90,4 +90,6 @@ public class IntervenantDAO {
         }
         delegate.traiterFinWS(b, b);
     }
+
+    //public
 }

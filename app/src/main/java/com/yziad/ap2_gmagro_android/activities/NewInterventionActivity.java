@@ -24,13 +24,14 @@ import com.yziad.ap2_gmagro_android.models.CSOD;
 import com.yziad.ap2_gmagro_android.models.Machine;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class NewInterventionActivity extends AppCompatActivity {
 
     SimpleDateFormat sdfDateHeure = new SimpleDateFormat("YYYY-MM-DD HH:mm:ss");
-    String date = "";
-    String time = "";
+    String date, time = "";
+    String dateFin, timeFin = "";
 
     private ArrayAdapter<Activite> adapterActivite;
     private ArrayAdapter<Machine> adapterMachine;
@@ -89,14 +90,15 @@ public class NewInterventionActivity extends AppCompatActivity {
 
             TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
                 time = hh + ":" + mm + ":00";
-                niDateDebut.setText(niDateDebut.getText().toString() + " " + hh + ":" + mm);
+                niDateDebut.setText(niDateDebut.getText().toString() + " " + String.format("%02d", hh) + ":" + String.format("%02d", mm));
             }, hourOfDay, minute, true);
             timePickerDialog.show();
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
                 date = yyyy + "-" + (MM + 1) + "-" + dd;
-                niDateDebut.setText(dd + "/" + (MM + 1) + "/" + yyyy);
+                niDateDebut.setText(String.format("%02d", dd) + "/" + String.format("%02d", (MM + 1)) + "/" + yyyy);
             }, year, month, day);
+            datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() - 1000);
             datePickerDialog.show();
 
         });
@@ -115,14 +117,23 @@ public class NewInterventionActivity extends AppCompatActivity {
         TextView niDateFin = findViewById(R.id.niDateFin);
         findViewById(R.id.niDateFinBtn).setOnClickListener(v -> {
             final Calendar c = Calendar.getInstance();
+            int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
+            int minute = c.get(Calendar.MINUTE);
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
 
+            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
+                timeFin = hh + ":" + mm + ":00";
+                niDateFin.setText(niDateFin.getText().toString() + " " + String.format("%02d", hh) + ":" + String.format("%02d", mm));
+            }, hourOfDay, minute, true);
+            timePickerDialog.show();
+
             DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
-                String dateFin = yyyy + "-" + (MM + 1) + "-" + dd;
-                niDateFin.setText(dd + "/" + (MM + 1) + "/" + yyyy);
+                dateFin = yyyy + "-" + (MM + 1) + "-" + dd;
+                niDateFin.setText(String.format("%02d", dd) + "/" + String.format("%02d", (MM + 1)) + "/" + yyyy);
             }, year, month, day);
+            datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() - 1000);
             datePickerDialog.show();
 
         });
@@ -137,19 +148,17 @@ public class NewInterventionActivity extends AppCompatActivity {
             }
         });
 
-        TextView niTempsArret = findViewById(R.id.niTempsArret);
-        findViewById(R.id.niTempsArretBtn).setOnClickListener(v -> {
-            final Calendar c = Calendar.getInstance();
-            int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
-            int minute = c.get(Calendar.MINUTE);
+        Spinner niTempsArret = findViewById(R.id.niTempsArret);
+        ArrayList<String> lesTempsArret = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 60; j = j + 15) {
+                lesTempsArret.add(String.format("%02d",i) + ":" + String.format("%02d", j));
+            }
+        }
+        lesTempsArret.add("08:00");
+        ArrayAdapter adapterTempsArret = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
+        niTempsArret.setAdapter(adapterTempsArret);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
-                String timeArret = hh + ":" + mm + ":00";
-                niTempsArret.setText(hh + ":" + mm);
-            }, hourOfDay, minute, true);
-            timePickerDialog.show();
-
-        });
 
     }
 
