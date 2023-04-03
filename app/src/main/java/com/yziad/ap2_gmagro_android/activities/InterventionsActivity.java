@@ -37,9 +37,7 @@ public class InterventionsActivity extends AppCompatActivity {
         iInterventions.setAdapter(adapterIntervention);
 
         Button iDisconnect = findViewById(R.id.iDisconnect);
-        iDisconnect.setOnClickListener(v -> {
-            cliqueRetour(findViewById(R.id.niDisconnect));
-        });
+        iDisconnect.setOnClickListener(v -> cliqueRetour(v));
 
         ActivityResultLauncher<Intent> launcherInterventionsActivity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), activityResult -> {
             switch (activityResult.getResultCode()) {
@@ -47,7 +45,7 @@ public class InterventionsActivity extends AppCompatActivity {
                     loadInterventions();
                     break;
                 case 2:
-                    iDisconnect.performClick();
+                    deconnexionDirecte();
                     break;
             }
             //activityResult.getResultCode() == 1)
@@ -114,5 +112,19 @@ public class InterventionsActivity extends AppCompatActivity {
             }
         });
         dialRetour.show();
+    }
+
+    private void deconnexionDirecte() {
+        IntervenantDAO.getInstance().disconnectUser(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if (b) {
+                    disconnectToast("Déconnexion réussie");
+                    finish();
+                } else {
+                    disconnectToast((String) result);
+                }
+            }
+        });
     }
 }

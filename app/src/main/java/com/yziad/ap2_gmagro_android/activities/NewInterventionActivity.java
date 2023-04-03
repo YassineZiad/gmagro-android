@@ -11,7 +11,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -21,17 +23,23 @@ import com.yziad.ap2_gmagro_android.daos.DelegateAsyncTask;
 import com.yziad.ap2_gmagro_android.daos.IntervenantDAO;
 import com.yziad.ap2_gmagro_android.models.Activite;
 import com.yziad.ap2_gmagro_android.models.CSOD;
+import com.yziad.ap2_gmagro_android.models.Intervenant;
+import com.yziad.ap2_gmagro_android.models.InterventionIntervenant;
 import com.yziad.ap2_gmagro_android.models.Machine;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class NewInterventionActivity extends AppCompatActivity {
 
-    SimpleDateFormat sdfDateHeure = new SimpleDateFormat("YYYY-MM-DD HH:mm:ss");
-    String date, time = "";
-    String dateFin, timeFin = "";
+    private SimpleDateFormat sdfDateHeure = new SimpleDateFormat("YYYY-MM-DD HH:mm:ss");
+    private String date, time = "";
+    private String dateFin, timeFin = "";
+    private Long dateDebutMillis = 0L;
 
     private ArrayAdapter<Activite> adapterActivite;
     private ArrayAdapter<Machine> adapterMachine;
@@ -39,6 +47,10 @@ public class NewInterventionActivity extends AppCompatActivity {
     private ArrayAdapter<CSOD> adapterCausesObjet;
     private ArrayAdapter<CSOD> adapterSymptomesDefaut;
     private ArrayAdapter<CSOD> adapterSymptomesObjet;
+    private ArrayAdapter<Intervenant> adapterIntervenant;
+
+    private List<InterventionIntervenant> lesInterventionIntervenants = new ArrayList<>();
+    private ArrayAdapter<InterventionIntervenant> adapterInterventionIntervenants;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,36 +63,13 @@ public class NewInterventionActivity extends AppCompatActivity {
         naTextView.setText("Intervenant : " + IntervenantDAO.getInstance().getConnectedUser());
 
         Button niDisconnect = findViewById(R.id.niDisconnect);
-        niDisconnect.setOnClickListener(v -> {
-            cliqueRetour(findViewById(R.id.niDisconnect));
-        });
+        niDisconnect.setOnClickListener(v -> cliqueDeconnexion(findViewById(R.id.niDisconnect)));
 
-        Spinner niActivites = findViewById(R.id.niActivites);
-        adapterActivite = new ArrayAdapter<Activite>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesActivites());
-        niActivites.setAdapter(adapterActivite);
-
-        Spinner niMachines = findViewById(R.id.niMachines);
-        adapterMachine = new ArrayAdapter<Machine>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesMachines());
-        niMachines.setAdapter(adapterMachine);
-
-        Spinner niCausesDefaut = findViewById(R.id.niCausesDefaut);
-        adapterCausesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesDefaut());
-        niCausesDefaut.setAdapter(adapterCausesDefaut);
-
-        Spinner niCausesObjet = findViewById(R.id.niCausesObjet);
-        adapterCausesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesObjet());
-        niCausesObjet.setAdapter(adapterCausesObjet);
-
-        Spinner niSymptomesDefaut = findViewById(R.id.niSymptomesDefaut);
-        adapterSymptomesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesDefaut());
-        niSymptomesDefaut.setAdapter(adapterSymptomesDefaut);
-
-        Spinner niSymptomesObjet = findViewById(R.id.niSymptomesObjet);
-        adapterSymptomesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesObjet());
-        niSymptomesObjet.setAdapter(adapterSymptomesObjet);
+        adaptSpinners();
 
         TextView niDateDebut = findViewById(R.id.niDateDebut);
-        findViewById(R.id.niDateDebutBtn).setOnClickListener(v -> {
+        ImageButton niDateDebutBtn = findViewById(R.id.niDateDebutBtn);
+        niDateDebutBtn.setOnClickListener(v -> {
             final Calendar c = Calendar.getInstance();
             int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
             int minute = c.get(Calendar.MINUTE);
@@ -91,8 +80,18 @@ public class NewInterventionActivity extends AppCompatActivity {
             TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
                 time = hh + ":" + mm + ":00";
                 niDateDebut.setText(niDateDebut.getText().toString() + " " + String.format("%02d", hh) + ":" + String.format("%02d", mm));
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                try {
+                    Date parsedDate = sdf.parse(date + " " + time);
+                    dateDebutMillis = parsedDate.getTime();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
             }, hourOfDay, minute, true);
             timePickerDialog.show();
+            timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
                 date = yyyy + "-" + (MM + 1) + "-" + dd;
@@ -100,8 +99,10 @@ public class NewInterventionActivity extends AppCompatActivity {
             }, year, month, day);
             datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() - 1000);
             datePickerDialog.show();
+            datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
 
         });
+        niDateDebutBtn.performClick();
 
         CheckBox niTermine = findViewById(R.id.niTermine);
         niTermine.setOnClickListener(v -> {
@@ -134,6 +135,9 @@ public class NewInterventionActivity extends AppCompatActivity {
                 niDateFin.setText(String.format("%02d", dd) + "/" + String.format("%02d", (MM + 1)) + "/" + yyyy);
             }, year, month, day);
             datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() - 1000);
+            if (dateDebutMillis != 0) {
+                datePickerDialog.getDatePicker().setMinDate(dateDebutMillis - 1000);
+            }
             datePickerDialog.show();
 
         });
@@ -148,17 +152,28 @@ public class NewInterventionActivity extends AppCompatActivity {
             }
         });
 
-        Spinner niTempsArret = findViewById(R.id.niTempsArret);
+
         ArrayList<String> lesTempsArret = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
+        lesTempsArret.add("00:15");
+        lesTempsArret.add("00:30");
+        lesTempsArret.add("00:45");
+        for (int i = 1; i < 8; i++) {
             for (int j = 0; j < 60; j = j + 15) {
                 lesTempsArret.add(String.format("%02d",i) + ":" + String.format("%02d", j));
             }
         }
         lesTempsArret.add("08:00");
+
+        Spinner niTempsArret = findViewById(R.id.niTempsArret);
         ArrayAdapter adapterTempsArret = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
         niTempsArret.setAdapter(adapterTempsArret);
 
+        Spinner niTpsIntervention = findViewById(R.id.niTpsIntervention);
+        ArrayAdapter adapterTempsIntervention = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
+        niTpsIntervention.setAdapter(adapterTempsIntervention);
+
+        Button niAjouterIntervenant = findViewById(R.id.niAjouterIntervenant);
+        niAjouterIntervenant.setOnClickListener(v -> ajouterInterventionIntervenant());
 
     }
 
@@ -211,6 +226,49 @@ public class NewInterventionActivity extends AppCompatActivity {
                 }
             }
         });
+        DatasDAO.getInstance().loadAllIntervenants(new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                if (b) {
+                    adapterIntervenant.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    private void adaptSpinners() {
+
+        Spinner niActivites = findViewById(R.id.niActivites);
+        adapterActivite = new ArrayAdapter<Activite>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesActivites());
+        niActivites.setAdapter(adapterActivite);
+
+        Spinner niMachines = findViewById(R.id.niMachines);
+        adapterMachine = new ArrayAdapter<Machine>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesMachines());
+        niMachines.setAdapter(adapterMachine);
+
+        Spinner niCausesDefaut = findViewById(R.id.niCausesDefaut);
+        adapterCausesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesDefaut());
+        niCausesDefaut.setAdapter(adapterCausesDefaut);
+
+        Spinner niCausesObjet = findViewById(R.id.niCausesObjet);
+        adapterCausesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesObjet());
+        niCausesObjet.setAdapter(adapterCausesObjet);
+
+        Spinner niSymptomesDefaut = findViewById(R.id.niSymptomesDefaut);
+        adapterSymptomesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesDefaut());
+        niSymptomesDefaut.setAdapter(adapterSymptomesDefaut);
+
+        Spinner niSymptomesObjet = findViewById(R.id.niSymptomesObjet);
+        adapterSymptomesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesObjet());
+        niSymptomesObjet.setAdapter(adapterSymptomesObjet);
+
+        Spinner niIntervenants = findViewById(R.id.niIntervenants);
+        adapterIntervenant = new ArrayAdapter<Intervenant>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesIntervenants());
+        niIntervenants.setAdapter(adapterIntervenant);
+
+        ListView niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
+        adapterInterventionIntervenants = new ArrayAdapter<InterventionIntervenant>(this, android.R.layout.simple_list_item_1, lesInterventionIntervenants);
+        niInterventionIntervenants.setAdapter(adapterInterventionIntervenants);
     }
 
     @Override
@@ -219,6 +277,30 @@ public class NewInterventionActivity extends AppCompatActivity {
     }
 
     private void cliqueRetour(View view) {
+        AlertDialog.Builder dialRetour = new AlertDialog.Builder(view.getContext());
+        dialRetour.setTitle("Annuler");
+        dialRetour.setMessage("Annuler la nouvelle intervention ?");
+        dialRetour.setCancelable(false);
+
+        dialRetour.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                setResult(1);
+                finish();
+            }
+        });
+
+        dialRetour.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        dialRetour.show();
+    }
+
+    private void cliqueDeconnexion(View view) {
         AlertDialog.Builder dialRetour = new AlertDialog.Builder(view.getContext());
         dialRetour.setTitle("Déconnexion");
         dialRetour.setMessage("Annuler la nouvelle intervention et se déconnecter ?");
@@ -240,6 +322,19 @@ public class NewInterventionActivity extends AppCompatActivity {
             }
         });
         dialRetour.show();
+    }
+
+    private void ajouterInterventionIntervenant() {
+        Spinner niIntervenants = findViewById(R.id.niIntervenants);
+        Spinner niTpsIntervention = findViewById(R.id.niTpsIntervention);
+
+        Intervenant i = (Intervenant) niIntervenants.getSelectedItem();
+        String temps = niTpsIntervention.getSelectedItem().toString();
+
+        InterventionIntervenant intervInt = new InterventionIntervenant(null, i, temps);
+
+        lesInterventionIntervenants.add(intervInt);
+        adapterInterventionIntervenants.notifyDataSetChanged();
     }
 
 }

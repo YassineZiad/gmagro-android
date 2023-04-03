@@ -12,6 +12,10 @@ import com.yziad.ap2_gmagro_android.wsHTTPS;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class IntervenantDAO {
 
     private static IntervenantDAO instance = null;
@@ -19,6 +23,9 @@ public class IntervenantDAO {
     private ObjectMapper om = new ObjectMapper();
 
     private Intervenant connectedUser;
+
+    private IntervenantDAO() {
+    }
 
     public static IntervenantDAO getInstance() {
         if (instance == null) {
@@ -91,5 +98,4 @@ public class IntervenantDAO {
         delegate.traiterFinWS(b, b);
     }
 
-    //public
 }

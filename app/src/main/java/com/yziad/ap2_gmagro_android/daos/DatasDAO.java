@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yziad.ap2_gmagro_android.models.Activite;
 import com.yziad.ap2_gmagro_android.models.CSOD;
+import com.yziad.ap2_gmagro_android.models.Intervenant;
 import com.yziad.ap2_gmagro_android.models.Intervention;
 import com.yziad.ap2_gmagro_android.models.Machine;
 import com.yziad.ap2_gmagro_android.wsHTTPS;
@@ -27,13 +28,14 @@ public class DatasDAO {
     private List<Intervention> lesInterventions;
     private List<Activite> lesActivites;
     private List<Machine> lesMachines;
-
     private List<CSOD> lesCausesDefaut, lesCausesObjet, lesSymptomesDefaut, lesSymptomesObjet;
+    private List<Intervenant> lesIntervenants;
 
     private DatasDAO() {
         lesInterventions = new ArrayList<>();
         lesActivites = new ArrayList<>();
         lesMachines = new ArrayList<>();
+        lesIntervenants = new ArrayList<>();
 
         lesCausesDefaut = new ArrayList<>();
         lesCausesObjet = new ArrayList<>();
@@ -59,6 +61,8 @@ public class DatasDAO {
     public List<Machine> getLesMachines() {
         return lesMachines;
     }
+
+    public List<Intervenant> getLesIntervenants() { return lesIntervenants; }
 
     public List<CSOD> getLesCausesDefaut() {
         return lesCausesDefaut;
@@ -270,6 +274,44 @@ public class DatasDAO {
 
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
+                }
+            } else {
+                Log.e("MAUVAIS RETOUR", jsonMsg.getString("retour"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        delegate.traiterFinWS(jRetour, b);
+    }
+
+    //INTERVENANTS
+    public void loadAllIntervenants(DelegateAsyncTask delegate) {
+        String url = controller + "action=intervenants";
+        wsHTTPS ws = new wsHTTPS() {
+            @Override
+            protected void onPostExecute(String jsonMsg) {
+                traiterPostLoadIntervenants(jsonMsg, delegate);
+            }
+        };
+        ws.execute(url);
+    }
+
+    private void traiterPostLoadIntervenants(String jRetour, DelegateAsyncTask delegate) {
+        Boolean b = null;
+        try {
+            JSONObject jsonMsg = new JSONObject(jRetour);
+            b = jsonMsg.getBoolean("success");
+
+            if (b) {
+                lesIntervenants.clear();
+                String jsonLesIntervenants = jsonMsg.getString("retour");
+                try {
+                    Arrays.asList(om.readValue(jsonLesIntervenants, Intervenant[].class)).forEach(intervenant -> lesIntervenants.add(intervenant));
+
+                } catch (JsonProcessingException e) {
+                    b = false;
+                    e.printStackTrace();
+
                 }
             } else {
                 Log.e("MAUVAIS RETOUR", jsonMsg.getString("retour"));
