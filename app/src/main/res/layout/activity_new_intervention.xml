@@ -12,6 +12,8 @@
         android:layout_height="match_parent"
         android:background="#53372E"
         android:fillViewport="true"
+        android:isScrollContainer="true"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -278,7 +280,11 @@
                 <ListView
                     android:id="@+id/niInterventionIntervenants"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp" />
+                    android:layout_height="125dp"
+                    android:isScrollContainer="true"
+                    android:nestedScrollingEnabled="true"
+                    android:scrollbarAlwaysDrawVerticalTrack="true"
+                    android:scrollbars="vertical" />
 
                 <LinearLayout
                     android:id="@+id/LayoutE"
@@ -306,6 +312,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Ajouter l'intervenant" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/LayoutF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/LayoutD">
+
+                <Button
+                    android:id="@+id/niValider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="Valider" />
+
+                <Button
+                    android:id="@+id/niAnnuler"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:text="Annuler" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

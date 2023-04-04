@@ -25,6 +25,7 @@ public class IntervenantDAO {
     private Intervenant connectedUser;
 
     private IntervenantDAO() {
+
     }
 
     public static IntervenantDAO getInstance() {

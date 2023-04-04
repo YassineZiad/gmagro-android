@@ -8,6 +8,7 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -57,15 +58,15 @@ public class NewInterventionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_intervention);
 
-        loadDatas();
-
         TextView naTextView = findViewById(R.id.niTextView);
         naTextView.setText("Intervenant : " + IntervenantDAO.getInstance().getConnectedUser());
 
         Button niDisconnect = findViewById(R.id.niDisconnect);
-        niDisconnect.setOnClickListener(v -> cliqueDeconnexion(findViewById(R.id.niDisconnect)));
+        niDisconnect.setOnClickListener(v -> cliqueDeconnexion(niDisconnect));
 
-        adaptSpinners();
+        Button niAnnuler = findViewById(R.id.niAnnuler);
+        niAnnuler.setOnClickListener(v -> cliqueRetour(niAnnuler));
+
 
         TextView niDateDebut = findViewById(R.id.niDateDebut);
         ImageButton niDateDebutBtn = findViewById(R.id.niDateDebutBtn);
@@ -77,7 +78,7 @@ public class NewInterventionActivity extends AppCompatActivity {
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, android.R.style.Theme_Holo_Dialog, (view, hh, mm) -> {
                 time = hh + ":" + mm + ":00";
                 niDateDebut.setText(niDateDebut.getText().toString() + " " + String.format("%02d", hh) + ":" + String.format("%02d", mm));
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -93,7 +94,7 @@ public class NewInterventionActivity extends AppCompatActivity {
             timePickerDialog.show();
             timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this,(view, yyyy, MM, dd) -> {
                 date = yyyy + "-" + (MM + 1) + "-" + dd;
                 niDateDebut.setText(String.format("%02d", dd) + "/" + String.format("%02d", (MM + 1)) + "/" + yyyy);
             }, year, month, day);
@@ -103,6 +104,9 @@ public class NewInterventionActivity extends AppCompatActivity {
 
         });
         niDateDebutBtn.performClick();
+
+        loadDatas();
+        adaptSpinners();
 
         CheckBox niTermine = findViewById(R.id.niTermine);
         niTermine.setOnClickListener(v -> {
@@ -124,11 +128,12 @@ public class NewInterventionActivity extends AppCompatActivity {
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, (view, hh, mm) -> {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(NewInterventionActivity.this, android.R.style.Theme_Holo_Dialog, (view, hh, mm) -> {
                 timeFin = hh + ":" + mm + ":00";
                 niDateFin.setText(niDateFin.getText().toString() + " " + String.format("%02d", hh) + ":" + String.format("%02d", mm));
             }, hourOfDay, minute, true);
             timePickerDialog.show();
+            timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(NewInterventionActivity.this, (view, yyyy, MM, dd) -> {
                 dateFin = yyyy + "-" + (MM + 1) + "-" + dd;
@@ -139,6 +144,7 @@ public class NewInterventionActivity extends AppCompatActivity {
                 datePickerDialog.getDatePicker().setMinDate(dateDebutMillis - 1000);
             }
             datePickerDialog.show();
+            datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
 
         });
 
@@ -152,29 +158,20 @@ public class NewInterventionActivity extends AppCompatActivity {
             }
         });
 
-
-        ArrayList<String> lesTempsArret = new ArrayList<>();
-        lesTempsArret.add("00:15");
-        lesTempsArret.add("00:30");
-        lesTempsArret.add("00:45");
-        for (int i = 1; i < 8; i++) {
-            for (int j = 0; j < 60; j = j + 15) {
-                lesTempsArret.add(String.format("%02d",i) + ":" + String.format("%02d", j));
-            }
-        }
-        lesTempsArret.add("08:00");
-
-        Spinner niTempsArret = findViewById(R.id.niTempsArret);
-        ArrayAdapter adapterTempsArret = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
-        niTempsArret.setAdapter(adapterTempsArret);
-
-        Spinner niTpsIntervention = findViewById(R.id.niTpsIntervention);
-        ArrayAdapter adapterTempsIntervention = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
-        niTpsIntervention.setAdapter(adapterTempsIntervention);
-
         Button niAjouterIntervenant = findViewById(R.id.niAjouterIntervenant);
         niAjouterIntervenant.setOnClickListener(v -> ajouterInterventionIntervenant());
 
+        ListView niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
+        niInterventionIntervenants.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
+                supprimerInterventionIntervenant((InterventionIntervenant) niInterventionIntervenants.getItemAtPosition(pos), arg1);
+                return false;
+            }
+        });
+
+        Button niValider = findViewById(R.id.niValider);
+        niValider.setOnClickListener(v -> validerAjoutIntervention(niValider));
     }
 
     private void loadDatas() {
@@ -269,12 +266,29 @@ public class NewInterventionActivity extends AppCompatActivity {
         ListView niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
         adapterInterventionIntervenants = new ArrayAdapter<InterventionIntervenant>(this, android.R.layout.simple_list_item_1, lesInterventionIntervenants);
         niInterventionIntervenants.setAdapter(adapterInterventionIntervenants);
+
+        ArrayList<String> lesTempsArret = new ArrayList<>();
+        lesTempsArret.add("00:15");
+        lesTempsArret.add("00:30");
+        lesTempsArret.add("00:45");
+        for (int i = 1; i < 8; i++) {
+            for (int j = 0; j < 60; j = j + 15) {
+                lesTempsArret.add(String.format("%02d",i) + ":" + String.format("%02d", j));
+            }
+        }
+        lesTempsArret.add("08:00");
+
+        Spinner niTempsArret = findViewById(R.id.niTempsArret);
+        ArrayAdapter adapterTempsArret = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
+        niTempsArret.setAdapter(adapterTempsArret);
+
+        Spinner niTpsIntervention = findViewById(R.id.niTpsIntervention);
+        ArrayAdapter adapterTempsIntervention = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
+        niTpsIntervention.setAdapter(adapterTempsIntervention);
     }
 
     @Override
-    public void onBackPressed() {
-        cliqueRetour(findViewById(R.id.niDisconnect));
-    }
+    public void onBackPressed() { cliqueRetour(findViewById(R.id.niAnnuler)); }
 
     private void cliqueRetour(View view) {
         AlertDialog.Builder dialRetour = new AlertDialog.Builder(view.getContext());
@@ -335,6 +349,76 @@ public class NewInterventionActivity extends AppCompatActivity {
 
         lesInterventionIntervenants.add(intervInt);
         adapterInterventionIntervenants.notifyDataSetChanged();
+
+        adapterIntervenant.remove(i);
+        if (adapterIntervenant.getCount() == 0) {
+            findViewById(R.id.niAjouterIntervenant).setVisibility(View.GONE);
+        }
+    }
+
+    private void supprimerInterventionIntervenant(InterventionIntervenant intervInt, View view) {
+
+        AlertDialog.Builder dialogDeleteIntervInt = new AlertDialog.Builder(view.getContext());
+        dialogDeleteIntervInt.setTitle("Annuler l'intervenant");
+        dialogDeleteIntervInt.setMessage("Annuler l'intervention de l'intervenant " + intervInt + " ?");
+        dialogDeleteIntervInt.setCancelable(false);
+
+        dialogDeleteIntervInt.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int j) {
+                Intervenant i = intervInt.getIntervenant();
+
+                lesInterventionIntervenants.remove(intervInt);
+                adapterInterventionIntervenants.notifyDataSetChanged();
+
+                adapterIntervenant.add(i);
+                findViewById(R.id.niAjouterIntervenant).setVisibility(View.VISIBLE);
+                dialogInterface.dismiss();
+            }
+        });
+
+        dialogDeleteIntervInt.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        dialogDeleteIntervInt.show();
+
+    }
+
+    private void validerAjoutIntervention(View view) {
+
+        AlertDialog.Builder dialogValiderInterv = new AlertDialog.Builder(view.getContext());
+        dialogValiderInterv.setTitle("Créer l'intervention");
+        dialogValiderInterv.setMessage("Valider et créer l'intervention ?");
+        dialogValiderInterv.setCancelable(false);
+
+        dialogValiderInterv.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                creerIntervention();
+                dialogInterface.dismiss();
+            }
+        });
+
+        dialogValiderInterv.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        dialogValiderInterv.show();
+
+    }
+
+    private void creerIntervention() {
+        String intervInts = "";
+        for (InterventionIntervenant intervInt : lesInterventionIntervenants) {
+            intervInts += intervInt.getIntervenant().getLogin() + "|" + intervInt.getTps_time() + "||";
+        }
+
+
     }
 
 }
