@@ -7,11 +7,13 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -22,9 +24,11 @@ import com.yziad.ap2_gmagro_android.R;
 import com.yziad.ap2_gmagro_android.daos.DatasDAO;
 import com.yziad.ap2_gmagro_android.daos.DelegateAsyncTask;
 import com.yziad.ap2_gmagro_android.daos.IntervenantDAO;
+import com.yziad.ap2_gmagro_android.daos.InterventionDAO;
 import com.yziad.ap2_gmagro_android.models.Activite;
 import com.yziad.ap2_gmagro_android.models.CSOD;
 import com.yziad.ap2_gmagro_android.models.Intervenant;
+import com.yziad.ap2_gmagro_android.models.Intervention;
 import com.yziad.ap2_gmagro_android.models.InterventionIntervenant;
 import com.yziad.ap2_gmagro_android.models.Machine;
 
@@ -52,6 +56,25 @@ public class NewInterventionActivity extends AppCompatActivity {
 
     private List<InterventionIntervenant> lesInterventionIntervenants = new ArrayList<>();
     private ArrayAdapter<InterventionIntervenant> adapterInterventionIntervenants;
+
+    private Spinner niActivites;
+    private Spinner niMachines;
+    private Spinner niCausesDefaut;
+    private Spinner niCausesObjet;
+    private Spinner niSymptomesDefaut;
+    private Spinner niSymptomesObjet;
+
+    private EditText niCommentaire;
+
+    private Spinner niIntervenants;
+    private ListView niInterventionIntervenants;
+    private Spinner niTempsArret;
+    private Spinner niTpsIntervention;
+
+    private CheckBox niTermine;
+    private CheckBox niMachineArretee;
+    private CheckBox niChangeOrgane;
+    private CheckBox niPertes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +129,9 @@ public class NewInterventionActivity extends AppCompatActivity {
         niDateDebutBtn.performClick();
 
         loadDatas();
-        adaptSpinners();
+        adaptViews();
 
-        CheckBox niTermine = findViewById(R.id.niTermine);
+        niTermine = findViewById(R.id.niTermine);
         niTermine.setOnClickListener(v -> {
             LinearLayout niDateFinLayout = findViewById(R.id.niDateFinLayout);
             if (niDateFinLayout.getVisibility() == View.INVISIBLE) {
@@ -148,7 +171,7 @@ public class NewInterventionActivity extends AppCompatActivity {
 
         });
 
-        CheckBox niMachineArretee = findViewById(R.id.niMachineArretee);
+        niMachineArretee = findViewById(R.id.niMachineArretee);
         niMachineArretee.setOnClickListener(v -> {
             LinearLayout niTempsArretLayout = findViewById(R.id.niTempsArretLayout);
             if (niTempsArretLayout.getVisibility() == View.INVISIBLE) {
@@ -161,7 +184,7 @@ public class NewInterventionActivity extends AppCompatActivity {
         Button niAjouterIntervenant = findViewById(R.id.niAjouterIntervenant);
         niAjouterIntervenant.setOnClickListener(v -> ajouterInterventionIntervenant());
 
-        ListView niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
+        niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
         niInterventionIntervenants.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
@@ -233,37 +256,37 @@ public class NewInterventionActivity extends AppCompatActivity {
         });
     }
 
-    private void adaptSpinners() {
+    private void adaptViews() {
 
-        Spinner niActivites = findViewById(R.id.niActivites);
+        niActivites = findViewById(R.id.niActivites);
         adapterActivite = new ArrayAdapter<Activite>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesActivites());
         niActivites.setAdapter(adapterActivite);
 
-        Spinner niMachines = findViewById(R.id.niMachines);
+        niMachines = findViewById(R.id.niMachines);
         adapterMachine = new ArrayAdapter<Machine>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesMachines());
         niMachines.setAdapter(adapterMachine);
 
-        Spinner niCausesDefaut = findViewById(R.id.niCausesDefaut);
+        niCausesDefaut = findViewById(R.id.niCausesDefaut);
         adapterCausesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesDefaut());
         niCausesDefaut.setAdapter(adapterCausesDefaut);
 
-        Spinner niCausesObjet = findViewById(R.id.niCausesObjet);
+        niCausesObjet = findViewById(R.id.niCausesObjet);
         adapterCausesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesCausesObjet());
         niCausesObjet.setAdapter(adapterCausesObjet);
 
-        Spinner niSymptomesDefaut = findViewById(R.id.niSymptomesDefaut);
+        niSymptomesDefaut = findViewById(R.id.niSymptomesDefaut);
         adapterSymptomesDefaut = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesDefaut());
         niSymptomesDefaut.setAdapter(adapterSymptomesDefaut);
 
-        Spinner niSymptomesObjet = findViewById(R.id.niSymptomesObjet);
+        niSymptomesObjet = findViewById(R.id.niSymptomesObjet);
         adapterSymptomesObjet = new ArrayAdapter<CSOD>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesSymptomesObjet());
         niSymptomesObjet.setAdapter(adapterSymptomesObjet);
 
-        Spinner niIntervenants = findViewById(R.id.niIntervenants);
+        niIntervenants = findViewById(R.id.niIntervenants);
         adapterIntervenant = new ArrayAdapter<Intervenant>(this, android.R.layout.simple_spinner_item, DatasDAO.getInstance().getLesIntervenants());
         niIntervenants.setAdapter(adapterIntervenant);
 
-        ListView niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
+        niInterventionIntervenants = findViewById(R.id.niInterventionIntervenants);
         adapterInterventionIntervenants = new ArrayAdapter<InterventionIntervenant>(this, android.R.layout.simple_list_item_1, lesInterventionIntervenants);
         niInterventionIntervenants.setAdapter(adapterInterventionIntervenants);
 
@@ -278,13 +301,20 @@ public class NewInterventionActivity extends AppCompatActivity {
         }
         lesTempsArret.add("08:00");
 
-        Spinner niTempsArret = findViewById(R.id.niTempsArret);
+        niTempsArret = findViewById(R.id.niTempsArret);
         ArrayAdapter adapterTempsArret = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
         niTempsArret.setAdapter(adapterTempsArret);
 
-        Spinner niTpsIntervention = findViewById(R.id.niTpsIntervention);
+        niTpsIntervention = findViewById(R.id.niTpsIntervention);
         ArrayAdapter adapterTempsIntervention = new ArrayAdapter(this, android.R.layout.simple_spinner_item, lesTempsArret);
         niTpsIntervention.setAdapter(adapterTempsIntervention);
+
+        niTermine = findViewById(R.id.niTermine);
+        niMachineArretee = findViewById(R.id.niMachineArretee);
+        niChangeOrgane = findViewById(R.id.niChangeOrgane);
+        niPertes = findViewById(R.id.niPertes);
+
+        niCommentaire = findViewById(R.id.niCommentaire);
     }
 
     @Override
@@ -413,11 +443,44 @@ public class NewInterventionActivity extends AppCompatActivity {
     }
 
     private void creerIntervention() {
+
+        String dh_debut = date + " " + time;
+        String dh_fin = null;
+
+        String activite = ((Activite) niActivites.getSelectedItem()).getCode();
+        String machine = ((Machine) niMachines.getSelectedItem()).getCode();
+        String cd = ((CSOD) niCausesDefaut.getSelectedItem()).getCode();
+        String co = ((CSOD) niCausesObjet.getSelectedItem()).getCode();
+        String sd = ((CSOD) niSymptomesDefaut.getSelectedItem()).getCode();
+        String so = ((CSOD) niSymptomesObjet.getSelectedItem()).getCode();
+
         String intervInts = "";
         for (InterventionIntervenant intervInt : lesInterventionIntervenants) {
             intervInts += intervInt.getIntervenant().getLogin() + "|" + intervInt.getTps_time() + "||";
+            Log.e("INTERV-INTS", intervInt.getIntervenant().getLogin() + "|" + intervInt.getTps_time() + "||");
         }
 
+        String login = IntervenantDAO.getInstance().getConnectedUser().getLogin();
+        String site_uai = IntervenantDAO.getInstance().getConnectedUser().getSite_uai();
+        String commentaire = niCommentaire.getText().toString();
+        String temps_arret = null;
+
+        if (niTermine.isEnabled()) {
+            dh_fin = dateFin + " " + timeFin;
+        }
+        if (niMachineArretee.isEnabled()) {
+            temps_arret = niTempsArret.getSelectedItem().toString();
+        }
+
+        Intervention i = new Intervention(0, dh_debut, dh_fin, commentaire, temps_arret, niChangeOrgane.isEnabled() + "", niPertes.isEnabled() + "",
+                null, null, login, site_uai, activite, machine, cd, co, sd, so);
+        InterventionDAO.getInstance().createIntervention(i, intervInts, new DelegateAsyncTask() {
+            @Override
+            public void traiterFinWS(Object result, Boolean b) {
+                setResult(1);
+                finish();
+            }
+        });
 
     }
 
